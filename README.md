@@ -1,2 +1,2 @@
-# My-Project
-Project on 
+# Supply Chain Optimization: Analyzing Delivery Delays and Logistics Efficiency
+In the global logistics industry, shipping delays not only increase operational costs but also significantly reduce customer satisfaction. This project aims to analyze historical supply chain data to identify bottlenecks in the delivery process and understand why certain shipments fail to meet their scheduled timelines.
