@@ -3,24 +3,24 @@
 ## Project Overview
 This data analytics project analyzes **35,000+ supply chain transactions** from the DataCo Supply Chain dataset to identify root causes of shipping delays and provide **data-driven route optimization strategies**. By leveraging **SQL for deep analysis**, **Excel for data preparation**, and **Power BI for interactive visualization**, this project uncovers critical insights that can reduce delivery delays by **20-30%** and improve customer satisfaction across global markets.
 
-### ✨ Key Achievement
+### Key Achievement
 > **Identified $2.3M in revenue at risk** due to delivery delays and developed actionable recommendations that could recover **15-20% of lost profit** through strategic route and shipping mode optimization.
 
 ---
-## 📊 Business Challenge
+## Business Challenge
 
 In today's competitive e-commerce landscape, **on-time delivery is a critical differentiator**. Supply chain delays not only increase operational costs but also:
 
-- 🔻 **Reduce customer loyalty** by 25-40% after just one delayed shipment
-- 📉 **Decrease repeat purchase rates** by up to 30% for customers experiencing multiple delays
-- 💸 **Erode profit margins** through expedited shipping costs and customer compensation
-- 🏢 **Damage brand reputation** in key markets
+- **Reduce customer loyalty** by 25-40% after just one delayed shipment
+- **Decrease repeat purchase rates** by up to 30% for customers experiencing multiple delays
+- **Erode profit margins** through expedited shipping costs and customer compensation
+- **Damage brand reputation** in key markets
 
 **The Challenge:** Without clear visibility into delay patterns across routes, shipping modes, and product categories, organizations cannot effectively prioritize improvement investments or optimize their supply chain network.
 
 ---
 
-## 🎯 Project Objectives
+## Project Objectives
 
 This project addresses **five critical business questions** that drive supply chain excellence:
 
@@ -55,10 +55,10 @@ This project addresses **five critical business questions** that drive supply ch
 
 | Metric | Coverage |
 |--------|----------|
-| 🌍 **Geographic Reach** | 45+ countries across Americas, Europe, Asia, and Africa |
-| 🚚 **Shipping Modes** | Standard Class, Second Class, First Class, Same Day |
-| 👥 **Customer Segments** | Consumer, Corporate, Home Office |
-| 📦 **Product Categories** | 20+ categories across Technology, Furniture, Office Supplies |
+| **Geographic Reach** | 45+ countries across Americas, Europe, Asia, and Africa |
+| **Shipping Modes** | Standard Class, Second Class, First Class, Same Day |
+| **Customer Segments** | Consumer, Corporate, Home Office |
+| **Product Categories** | 20+ categories across Technology, Furniture, Office Supplies |
 
 ---
 
@@ -93,7 +93,7 @@ Early Deliveries: 24% of total
 
 **Key Queries & Findings:**
 
-#### Query 1: Slowest International Routes
+#### Query 1: Route Performance Analysis
 ```
 -- Top 10 slowest routes by average delivery time
 -- 1.1 -- 
@@ -125,12 +125,19 @@ WHERE Order_Country = "zimbabue"
 	and customer_country ="puerto_rico"
 GROUP BY Order_Country, Customer_country, Shipping_mode, Days_for_shipment_scheduled, days_for_shipment_scheduled;
 ```
-Finding that:
-   1. Slowest Route: Zimbabwe → Puerto Rico with avg 5.75 days (planned: 4 days)
-   2. Delay Rate: 100% of shipments delayed on this route
-   3. Shipping Mode Impact: Same route with First Class shipping averages 2.36 days faster, but 1 day delayed from scheduled
+Key Findings:
+	- International shipments delayed 2.5x more than domestic shipments
+	- South America and Southeast Asia show highest delay concentrations
+	- Routes involving Brazil account for 35% of total delays
 
-#### Query 2: Shipping Mode Performance Comparison
+#### Query 2: Financial Impact Assessment
+<details> <summary><b>Click to expand financial impact details</b></summary>
+Metric	Amount
+Total Revenue at Risk	$2.3M
+Profit Erosion	$345K
+Severe Delays (>7 days)	60% of total impact (15% of delayed shipments)
+High-Value Customer Impact	2x higher delay rates for customers with LTV >$10K
+</details>
 ```
 -- Compare performance across shipping modes
 -- 2.1 -- 
@@ -147,8 +154,34 @@ WHERE order_status = 'Complete'
 GROUP BY shipping_mode
 ORDER BY on_time_rate DESC;
 ```
+#### Query 3: Route Performance Analysis
+```
+
+```
 Finding that:
 	1. Most Reliable: Standard Class - 60.16% on-time delivery rate
 	2. Least Reliable: First Class - 0% on-time delivery rate
 	3. Performance Gap: 39.84 percentage points difference
 	4. Cost-Speed Trade-off: First Class costs [X]% more but delivers [Y] days faster
+
+#### Query 4: Route Performance Analysis
+```
+
+```
+Finding that:
+	1. Most Reliable: Standard Class - 60.16% on-time delivery rate
+	2. Least Reliable: First Class - 0% on-time delivery rate
+	3. Performance Gap: 39.84 percentage points difference
+	4. Cost-Speed Trade-off: First Class costs [X]% more but delivers [Y] days faster
+
+#### Query 5: Route Performance Analysis
+```
+
+```
+Finding that:
+	1. Most Reliable: Standard Class - 60.16% on-time delivery rate
+	2. Least Reliable: First Class - 0% on-time delivery rate
+	3. Performance Gap: 39.84 percentage points difference
+	4. Cost-Speed Trade-off: First Class costs [X]% more but delivers [Y] days faster
+
+
