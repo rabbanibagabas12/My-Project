@@ -67,12 +67,14 @@ Early Deliveries: 24% of total
 
 ### 2. Data Analysis (SQL)
 
+####Business Questions
+
 **Key Queries & Findings:**
 
 #### Query 1: Slowest International Routes
-```sql
+```
 -- Top 10 slowest routes by average delivery time
-"1.1" 
+-- 1.1 -- 
 SELECT 
     order_country,
     customer_country,
@@ -82,28 +84,49 @@ SELECT
     ROUND(AVG(days_for_shipping_real), 2) as avg_delivery_days,
     ROUND(AVG(delay_days), 2) as avg_delay_days,
     ROUND(SUM(CASE WHEN delay_days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_percentage
-FROM datacosupplychaindatasetafter
+FROM dataco
 WHERE order_status = 'Complete'
 GROUP BY order_country, customer_country, shipping_mode, days_for_shipment_scheduled
 HAVING COUNT(*) >= 10
 ORDER BY avg_delivery_days DESC
 LIMIT 10;
 
-"1.2"
+-- 1.2 -- 
 SELECT
 	Order_Country,
     Customer_country,
     Shipping_mode,
     Days_for_shipment_scheduled,
     ROUND(AVG(days_for_shipping_real), 2) as avg_delivery_days
-FROM datacosupplychaindatasetafter
+FROM dataco
 WHERE Order_Country = "zimbabue"
 	and customer_country ="puerto_rico"
 GROUP BY Order_Country, Customer_country, Shipping_mode, Days_for_shipment_scheduled, days_for_shipment_scheduled;
-
-Finding 1:
+```
+Finding that:
    1. Slowest Route: Zimbabwe → Puerto Rico with avg 5.75 days (planned: 4 days)
    2. Delay Rate: 100% of shipments delayed on this route
-   3. Shipping Mode Impact: Same route with First Class shipping averages 2 days faster
+   3. Shipping Mode Impact: Same route with First Class shipping averages 2.36 days faster, but 1 day delayed from scheduled
 
-#### Query 1: Slowest International Routes
+#### Query 2: Shipping Mode Performance Comparison
+```
+-- Compare performance across shipping modes
+-- 2.1 -- 
+SELECT 
+    shipping_mode,
+    COUNT(*) as total_shipments,
+    ROUND(AVG(days_for_shipping_real), 2) as avg_actual_delivery,
+    ROUND(AVG(days_for_shipment_scheduled), 2) as avg_planned_delivery,
+    ROUND(AVG(delay_days), 2) as avg_delay,
+    ROUND(SUM(CASE WHEN delay_days <= 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as on_time_rate,
+    ROUND(SUM(CASE WHEN delay_days > 7 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as severe_delay_rate
+FROM dataco
+WHERE order_status = 'Complete'
+GROUP BY shipping_mode
+ORDER BY on_time_rate DESC;
+```
+Finding that:
+	1. Most Reliable: Standard Class - 60.16% on-time delivery rate
+	2. Least Reliable: First Class - 0% on-time delivery rate
+	3. Performance Gap: 39.84 percentage points difference
+	4. Cost-Speed Trade-off: First Class costs [X]% more but delivers [Y] days faster
