@@ -9,20 +9,23 @@ This data analytics project analyzes the DataCo Supply Chain dataset to identify
 1. **Which shipping routes experience the longest delivery times?**
    - Identify top 10 slowest origin-destination pairs
    - Compare planned vs actual delivery times
+   - Analyze by shipping mode performance
 
 2. **What are the primary factors causing shipping delays?**
-   - Carrier performance analysis
-   - Product category impact
-   - Geographic patterns
-   - Seasonal trends
+   - Shipping mode impact analysis
+   - Product category influence
+   - Geographic patterns and regional performance
+   - Seasonal trends and timing factors
+   - Customer segment analysis
 
-3. **Which vendors/carriers have the best on-time delivery records?**
-   - Vendor reliability scoring
-   - Consistency analysis across routes
+3. **How do different shipping modes compare in reliability?**
+   - Standard vs Express vs Same-day delivery performance
+   - Cost vs speed trade-off analysis
 
-4. **What alternative routes or vendors can improve delivery efficiency?**
+4. **What alternative routes or shipping strategies can improve delivery efficiency?**
    - Route substitution recommendations
-   - Carrier selection framework
+   - Shipping mode optimization
+   - Regional distribution strategies
 
 ## Dataset
 - **Source**: Data Co Supply Chain Dataset (Kaggle)
@@ -45,11 +48,27 @@ This data analytics project analyzes the DataCo Supply Chain dataset to identify
 ### 1. Data Cleaning & Preparation (Excel)
 
 **Initial Data Assessment:**
-- Total records: [X] rows
+- Total records: 180520 rows
 - Missing values identified and handled:
-  - `Delivery Date`: [X] nulls removed
+  - `Customer Zipcode`: 3 nulls removed
+  - `Order Zipcode`: 155679 nulls removed
+-Delete Product Description Column
 - Data types verified and corrected
 - Calculated new columns:
   - `Delay Days` = Actual Delivery Days - Planned Delivery Days
+  - `Delay Severity` = IF=(Delay Days<0,"Early",IF(Delay Days=0,"On Time",IF(Delay Days<=3,"Minor Delay",IF(Delay Days>3,"Moderate Delay"))))
+  - `On_Time_Flag` = IF(Delay Days ≤ 0, "On Time", "Delayed")
 
 **Data Quality Summary:**
+There is no duplicate data
+Delayed Shipments: 57% of total
+Average Delay: 1.6 days
+Early Deliveries: 24% of total
+
+### 2. Data Analysis (SQL)
+
+**Key Queries & Findings:**
+
+#### Query 1: Slowest International Routes
+```sql
+-- Top 10 slowest routes by average delivery time
