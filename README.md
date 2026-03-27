@@ -72,3 +72,38 @@ Early Deliveries: 24% of total
 #### Query 1: Slowest International Routes
 ```sql
 -- Top 10 slowest routes by average delivery time
+"1.1" 
+SELECT 
+    order_country,
+    customer_country,
+    shipping_mode,
+	days_for_shipment_scheduled,
+    COUNT(*) as total_shipments,
+    ROUND(AVG(days_for_shipping_real), 2) as avg_delivery_days,
+    ROUND(AVG(delay_days), 2) as avg_delay_days,
+    ROUND(SUM(CASE WHEN delay_days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_percentage
+FROM datacosupplychaindatasetafter
+WHERE order_status = 'Complete'
+GROUP BY order_country, customer_country, shipping_mode, days_for_shipment_scheduled
+HAVING COUNT(*) >= 10
+ORDER BY avg_delivery_days DESC
+LIMIT 10;
+
+"1.2"
+SELECT
+	Order_Country,
+    Customer_country,
+    Shipping_mode,
+    Days_for_shipment_scheduled,
+    ROUND(AVG(days_for_shipping_real), 2) as avg_delivery_days
+FROM datacosupplychaindatasetafter
+WHERE Order_Country = "zimbabue"
+	and customer_country ="puerto_rico"
+GROUP BY Order_Country, Customer_country, Shipping_mode, Days_for_shipment_scheduled, days_for_shipment_scheduled;
+
+Finding 1:
+   1. Slowest Route: Zimbabwe → Puerto Rico with avg 5.75 days (planned: 4 days)
+   2. Delay Rate: 100% of shipments delayed on this route
+   3. Shipping Mode Impact: Same route with First Class shipping averages 2 days faster
+
+#### Query 1: Slowest International Routes
