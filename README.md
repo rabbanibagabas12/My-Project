@@ -131,14 +131,14 @@ Key Findings:
 	- Routes involving Brazil account for 35% of total delays
 
 #### Query 2: Financial Impact Assessment
-<details> <summary><b>Click to expand financial impact details</b></summary>
+
 | Metric | Amount |
 |------|---------|	
 |Total Revenue at Risk |	$2.3M
 |Profit Erosion |	$345K
 |Severe Delays(>7 days) |	60% of total impact (15% of delayed shipments)
 |High-Value Customer Impact |	2x higher delay rates for customers with LTV >$10K
-</details>
+
 ```
 -- Compare performance across shipping modes
 -- 2.1 -- 
