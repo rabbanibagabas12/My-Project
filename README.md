@@ -184,7 +184,9 @@ FROM route_stats rs1
 ORDER BY delay_rate DESC;
 ```
 <details> <summary><b>Click to expand route analysis details</b></summary>
-	Top 3 Slowest Route
+	
+Top 3 Slowest Route
+
 | Origin (Order Country) | Destination (Customer Country) | Shipping Mode | Avg. Delivery Time | Avg. Delay |
 | :--- | :--- | :--- | :--- | :--- |
 | **Moldavia** | Puerto Rico | Second Class | **5.75 Days** | +3.75 Days |
@@ -299,12 +301,14 @@ ORDER BY investment_priority
 LIMIT 20;
 ```
 <details> <summary><b>Click to expand financial impact details</b></summary>
+
 | Financial Metric | Estimated Value | Risk Level |
 | :--- | :--- | :--- |
 | **Total Revenue at Risk** | $36,784,085.28 |  Critical |
 | **Direct Loss from Delays** | $1,190,029.72 |  High |
 | **Estimated Future Revenue Loss** | $5,517,612.79 |  Critical |
 | **Current Operational Loss** | $2,044,479.37 |  High |
+
 </details>
 
 #### Query 3: Customer Retention Insights
@@ -438,7 +442,9 @@ ORDER BY sensitivity_score DESC;
 
 ```
 <details> <summary><b>Click to expand retention analysis details</b></summary>
+
 Impact of Shipping Delays on Customer Loyalty and Retention
+
 | Delivery Experience Tier | Total Customers | Avg. Orders Per Customer | Avg. Lifetime Value (CLV) | Avg. Days Delayed | Retention Rate (%) |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **1. Perfect (100% On-Time)** | 4,631 | 1.27 | $523.35 | -0.70 | 13.71% |
