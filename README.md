@@ -185,18 +185,22 @@ ORDER BY delay_rate DESC;
 ```
 <details> <summary><b>Click to expand route analysis details</b></summary>
 	
-Top 3 Slowest Route
+Top 3 Slowest Route by Average Delay 
 
 | Origin (Order Country) | Destination (Customer Country) | Shipping Mode | Avg. Delivery Time | Avg. Delay |
 | :--- | :--- | :--- | :--- | :--- |
 | **Moldavia** | Puerto Rico | Second Class | **5.75 Days** | +3.75 Days |
 | **Uganda** | USA | Second Class | **5.45 Days** | +3.45 Days |
-| **Trinidad & Tobago** | USA | Standard Class | **5.11 Days** | +1.11 Days |
+| **Bulgaria** | Puerto Rico | Second Class | **5.07 Days** | +3.07 Days |
 
 Key Findings:
-	- International shipments have a significantly higher delay rate than domestic (USA) shipment with international delay rate average at 63.45%.
-	- Africa and South America show highest delay concentrations.
-	- Routes involving USA account for 67% of total delays
+1. **Shipping Mode Systemic Failure (Second Class):**
+The top three slowest routes are exclusively concentrated in the Second Class shipping mode. The data suggests that for these specific international corridors, the current "Second Class" scheduling is unrealistic, resulting in a 100% failure rate to meet expected delivery windows.
+2. **Regional Destination Critical Point (Puerto Rico):**
+Two out of the top three worst-performing routes terminate in Puerto Rico. This indicates that the logistics bottleneck is likely localized at the destination port or within the island's last-mile delivery infrastructure, particularly for incoming shipments from Eastern Europe (Moldavia and Bulgaria).
+3. **Cross-Continental Latency Discrepancy:**
+The highest delays are originating from Eastern Europe and Africa. While trans-oceanic shipping naturally takes longer, the high "Average Delay" (vs. total transit time) suggests that the routing from these regions lacks the predictability found in other markets like LATAM or Asia-Pacific, requiring a reassessment of carrier partnerships in these zones.
+
 </details>
 
 #### Query 2: Financial Impact Assessment
@@ -464,17 +468,352 @@ Key Findings:
 
 #### Query 4: Shipping Mode Optimization
 ```
+-- 4.1 --
+-- Create comprehensive shipping mode scorecard
+WITH mode_metrics AS (
+    SELECT 
+        Shipping_Mode,
+        COUNT(*) as total_shipments,
+        ROUND(AVG(Days_for_shipping_real), 2) as avg_delivery_days,
+        ROUND(AVG(Days_for_shipment_scheduled), 2) as avg_planned_days,
+        ROUND(SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_rate,
+        ROUND(AVG(Delay_Days), 2) as avg_delay_days,
+        ROUND(AVG(Sales), 2) as avg_order_value,
+        ROUND(AVG(Order_Profit_Per_Order), 2) as avg_profit
+    FROM shipping_data
+    GROUP BY Shipping_Mode
+),
+median_calc AS (
+    SELECT 
+        Shipping_Mode,
+        AVG(Days_for_shipping_real) as median_delivery_days
+    FROM (
+        SELECT 
+            Shipping_Mode, 
+            Days_for_shipping_real,
+            ROW_NUMBER() OVER (PARTITION BY Shipping_Mode ORDER BY Days_for_shipping_real) as row_num,
+            COUNT(*) OVER (PARTITION BY Shipping_Mode) as total_count
+        FROM shipping_data
+    ) sub
+    WHERE row_num IN (FLOOR((total_count + 1) / 2), CEIL((total_count + 1) / 2))
+    GROUP BY Shipping_Mode
+),
+mode_cost_estimates AS (
+    SELECT 
+        Shipping_Mode,
+        CASE 
+            WHEN Shipping_Mode = 'Same Day' THEN 25.00
+            WHEN Shipping_Mode = 'First Class' THEN 15.00
+            WHEN Shipping_Mode = 'Second Class' THEN 8.00
+            WHEN Shipping_Mode = 'Standard Class' THEN 5.00
+            ELSE 10.00
+        END as estimated_cost_per_order,
+        CASE 
+            WHEN Shipping_Mode = 'Same Day' THEN 'Premium'
+            WHEN Shipping_Mode = 'First Class' THEN 'Express'
+            WHEN Shipping_Mode = 'Second Class' THEN 'Standard'
+            WHEN Shipping_Mode = 'Standard Class' THEN 'Economy'
+            ELSE 'Mixed'
+        END as service_tier
+    FROM shipping_data
+    GROUP BY Shipping_Mode
+)
+SELECT 
+    mm.Shipping_Mode,
+    me.service_tier,
+    mm.total_shipments,
+    mm.avg_delivery_days,
+    mc.median_delivery_days,
+    mm.delay_rate,
+    mm.avg_delay_days,
+    me.estimated_cost_per_order,
+    ROUND((me.estimated_cost_per_order - 5.00) / NULLIF(5.00 - mm.avg_delivery_days, 0), 2) as cost_per_day_saved,
+    ROUND((100 - mm.delay_rate) * 0.4 + (1 / NULLIF(mm.avg_delivery_days, 0)) * 100 * 0.3 + (1 / NULLIF(me.estimated_cost_per_order, 0)) * 100 * 0.3, 2) as performance_score
+FROM mode_metrics mm
+JOIN mode_cost_estimates me ON mm.Shipping_Mode = me.Shipping_Mode
+JOIN median_calc mc ON mm.Shipping_Mode = mc.Shipping_Mode
+ORDER BY performance_score DESC;
 
+-- 4.2 -- 
+-- Determine best shipping mode based on order value, product type, and urgency
+SELECT 
+    CASE 
+        WHEN Sales < 100 THEN 'Low Value (<$100)'
+        WHEN Sales < 500 THEN 'Medium Value ($100-$500)'
+        WHEN Sales < 1000 THEN 'High Value ($500-$1000)'
+        ELSE 'Premium Value (>$1000)'
+    END as order_value_tier,
+    Department_Name,
+    Shipping_Mode,
+    COUNT(*) as shipments,
+    ROUND(SUM(CASE WHEN Late_delivery_risk = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_rate,
+    ROUND(AVG(Days_for_shipping_real), 2) as avg_delivery_days,
+    ROUND(AVG(Order_Profit_Per_Order), 2) as avg_profit,
+    -- Calculate mode suitability score
+    ROUND((100 - (SUM(CASE WHEN Late_delivery_risk = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*))) * 
+          (AVG(Order_Profit_Per_Order) / 100), 2) as suitability_score
+FROM shipping_data
+GROUP BY 
+    CASE 
+        WHEN Sales < 100 THEN 'Low Value (<$100)'
+        WHEN Sales < 500 THEN 'Medium Value ($100-$500)'
+        WHEN Sales < 1000 THEN 'High Value ($500-$1000)'
+        ELSE 'Premium Value (>$1000)'
+    END,
+    Department_Name,
+    Shipping_Mode
+HAVING COUNT(*) >= 20
+ORDER BY order_value_tier, suitability_score DESC;
+
+-- 4.3 --
+-- Calculate potential benefits of switching shipping modes for problematic routes
+WITH current_performance AS (
+    SELECT 
+        Order_Country,
+        Customer_Country,
+        Shipping_Mode,
+        COUNT(*) as shipment_count,
+        ROUND(SUM(CASE WHEN Late_delivery_risk = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as current_delay_rate,
+        ROUND(AVG(Days_for_shipping_real), 2) as current_delivery_days
+    FROM shipping_data
+    GROUP BY Order_Country, Customer_Country, Shipping_Mode
+    HAVING COUNT(*) >= 10
+),
+alternative_modes AS (
+    SELECT 
+        cp.Order_Country,
+        cp.Customer_Country,
+        cp.Shipping_Mode as current_mode,
+        alt.Shipping_Mode as alternative_mode,
+        cp.current_delay_rate,
+        cp.current_delivery_days,
+        ROUND(AVG(CASE WHEN alt.Shipping_Mode = s.Shipping_Mode THEN 
+            CASE WHEN s.Late_delivery_risk = 1 THEN 1 ELSE 0 END * 100.0 
+        END), 2) as alt_delay_rate,
+        ROUND(AVG(CASE WHEN alt.Shipping_Mode = s.Shipping_Mode THEN s.Days_for_shipping_real END), 2) as alt_delivery_days
+    FROM current_performance cp
+    CROSS JOIN (SELECT DISTINCT Shipping_Mode FROM shipping_data) alt
+    JOIN shipping_data s ON cp.Order_Country = s.Order_Country 
+        AND cp.Customer_Country = s.Customer_Country
+        AND alt.Shipping_Mode = s.Shipping_Mode
+    WHERE alt.Shipping_Mode != cp.Shipping_Mode
+    GROUP BY cp.Order_Country, cp.Customer_Country, cp.Shipping_Mode, alt.Shipping_Mode
+)
+SELECT 
+    Order_Country,
+    Customer_Country,
+    current_mode,
+    alternative_mode,
+    current_delay_rate,
+    alt_delay_rate,
+    ROUND(current_delay_rate - alt_delay_rate, 2) as delay_rate_improvement,
+    current_delivery_days,
+    alt_delivery_days,
+    ROUND(current_delivery_days - alt_delivery_days, 2) as days_saved,
+    CASE 
+        WHEN alt_delay_rate < current_delay_rate - 10 THEN 'Strongly Recommended'
+        WHEN alt_delay_rate < current_delay_rate - 5 THEN 'Recommended'
+        WHEN alt_delay_rate < current_delay_rate THEN 'Consider'
+        ELSE 'Not Recommended'
+    END as switch_recommendation
+FROM alternative_modes
+WHERE current_delay_rate > 20
+ORDER BY delay_rate_improvement DESC
+LIMIT 30;
 ```
+<details> <summary><b>Click to expand shipping mode analysis</b></summary>
+
+Transportation Performance Scorecard
+
+| Shipping Mode | On-Time Rate | Avg. Delivery | Cost | Performance Score |
+| :--- | :--- | :--- | :--- | :--- |
+| **Same Day** | 52.17% | 0.48 Days | $10.00 | 86.37 |
+| **Standard Class** | 60.23% | 4.00 Days | $10.00 | 34.59 |
+| **Second Class** | 20.27% | 3.99 Days | $10.00 | 18.63 |
+| **First Class** | 0.00% | 2.00 Days | $10.00 | 18.00 |
+
 Cost-Speed Trade-off:
-	- First Class costs 3x more but saves 3.4 days vs Standard Class
-	- Optimal for orders >$500 with time sensitivity
+While First Class is faster, Standard Class is 3x more likely to meet its delivery promise, representing a critical trade-off between speed and reliability.
+
+<details>
 
 #### Query 5: Product Category Vulnerability
 ```
+-- 5.1 --
+-- Create comprehensive delay vulnerability index for products
+WITH category_stats AS (
+    SELECT 
+        Department_Name,
+        Category_Name,
+        COUNT(*) as total_shipments,
+        ROUND(SUM(CASE WHEN Late_delivery_risk = 1 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_rate,
+        ROUND(AVG(Delay_Days), 2) as avg_delay_days,
+        ROUND(STDDEV(Delay_Days), 2) as delay_variability,
+        ROUND(AVG(Order_Item_Quantity), 2) as avg_quantity,
+        ROUND(SUM(Sales), 2) as total_revenue,
+        ROUND(AVG(Order_Profit_Per_Order), 2) as avg_profit,
+        -- Calculate complexity score (higher quantity = more complex)
+        ROUND(AVG(Order_Item_Quantity) / NULLIF(MAX(AVG(Order_Item_Quantity)) OVER (), 0) * 100, 2) as complexity_score
+    FROM shipping_data
+    GROUP BY Department_Name, Category_Name
+    HAVING COUNT(*) >= 30
+),
+vulnerability_index AS (
+    SELECT 
+        Department_Name,
+        Category_Name,
+        total_shipments,
+        delay_rate,
+        avg_delay_days,
+        delay_variability,
+        total_revenue,
+        avg_profit,
+        complexity_score,
+        -- Calculate vulnerability index (0-100)
+        ROUND((delay_rate * 0.4) + 
+              (avg_delay_days / NULLIF(MAX(avg_delay_days) OVER (), 0) * 100 * 0.3) +
+              (delay_variability / NULLIF(MAX(delay_variability) OVER (), 0) * 100 * 0.2) +
+              (complexity_score * 0.1), 2) as vulnerability_index
+    FROM category_stats
+)
+SELECT 
+    Department_Name,
+    Category_Name,
+    total_shipments,
+    delay_rate,
+    avg_delay_days,
+    delay_variability,
+    total_revenue,
+    ROUND(total_revenue * delay_rate / 100, 2) as revenue_at_risk,
+    vulnerability_index,
+    CASE 
+        WHEN vulnerability_index >= 80 THEN 'Critical - Immediate Action'
+        WHEN vulnerability_index >= 60 THEN 'High Priority'
+        WHEN vulnerability_index >= 40 THEN 'Medium Priority'
+        WHEN vulnerability_index >= 20 THEN 'Low Priority'
+        ELSE 'Stable'
+    END as priority_level,
+    RANK() OVER (ORDER BY vulnerability_index DESC) as risk_rank
+FROM vulnerability_index
+ORDER BY vulnerability_index DESC
+LIMIT 30;
 
+-- 5.2 --
+-- Analyze seasonal delay patterns for high-risk categories
+WITH high_risk_categories AS (
+    SELECT Category_Name
+    FROM shipping_data
+    GROUP BY Category_Name
+    HAVING SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) > 25
+),
+monthly_category_performance AS (
+    SELECT 
+        hrc.Category_Name,
+        MONTH(s.order_date) as month_num,
+        MONTHNAME(s.order_date) as month_name,
+        COUNT(*) as shipments,
+        ROUND(SUM(CASE WHEN s.Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_rate,
+        ROUND(AVG(s.Delay_Days), 2) as avg_delay_days,
+        ROUND(SUM(s.Sales), 2) as monthly_revenue
+    FROM shipping_data s
+    JOIN high_risk_categories hrc ON s.Category_Name = hrc.Category_Name
+    GROUP BY hrc.Category_Name, month_num, month_name
+),
+seasonal_patterns AS (
+    SELECT 
+        Category_Name,
+        month_name,
+        month_num,
+        shipments,
+        delay_rate,
+        avg_delay_days,
+        monthly_revenue,
+        ROUND(delay_rate / NULLIF(AVG(delay_rate) OVER (PARTITION BY Category_Name), 0) * 100, 2) as seasonal_index
+    FROM monthly_category_performance
+)
+SELECT 
+    Category_Name,
+    month_name,
+    shipments,
+    delay_rate,
+    avg_delay_days,
+    monthly_revenue,
+    seasonal_index,
+    CASE 
+        WHEN seasonal_index > 150 THEN 'Peak Delay Season'
+        WHEN seasonal_index > 120 THEN 'High Delay Season'
+        WHEN seasonal_index < 80 THEN 'Low Delay Season'
+        ELSE 'Normal Season'
+    END as season_category
+FROM seasonal_patterns
+ORDER BY Category_Name, month_num;
+
+-- 5.3 --
+-- Generate actionable recommendations based on category characteristics
+WITH category_problems AS (
+    SELECT 
+        Department_Name,
+        Category_Name,
+        COUNT(*) as total_shipments,
+        ROUND(SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 2) as delay_rate,
+        ROUND(AVG(Delay_Days), 2) as avg_delay,
+        ROUND(AVG(Order_Item_Quantity), 2) as avg_quantity,
+        ROUND(AVG(Order_Item_Product_Price), 2) as avg_unit_price,
+        CASE 
+            WHEN AVG(Order_Item_Quantity) > 5 AND SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) > 30 
+                THEN 'Bulk Order Processing'
+            WHEN AVG(Delay_Days) > 10 AND SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) > 25 
+                THEN 'Severe Transit Delays'
+            WHEN AVG(Delay_Days) BETWEEN 3 AND 10 AND SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) > 20 
+                THEN 'Moderate Handling Delays'
+            WHEN AVG(Order_Item_Product_Price) > 500 AND SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) > 15 
+                THEN 'High-Value Item Security'
+            ELSE 'General Operational Issues'
+        END as primary_issue
+    FROM shipping_data
+    GROUP BY Department_Name, Category_Name
+    HAVING COUNT(*) >= 30 AND SUM(CASE WHEN Delay_Days > 0 THEN 1 ELSE 0 END) * 100.0 / COUNT(*) > 15
+)
+SELECT 
+    Department_Name,
+    Category_Name,
+    total_shipments,
+    delay_rate,
+    avg_delay,
+    primary_issue,
+    CASE primary_issue
+        WHEN 'Bulk Order Processing' THEN 'Implement batch processing and optimize warehouse layout for pallets'
+        WHEN 'Severe Transit Delays' THEN 'Establish regional distribution centers and renegotiate carrier SLAs'
+        WHEN 'Moderate Handling Delays' THEN 'Cross-train staff and implement picking automation'
+        WHEN 'High-Value Item Security' THEN 'Secure packaging protocols and signature-required delivery'
+        ELSE 'Conduct process audit and enhance staff training'
+    END as recommendation_short_term,
+    CASE 
+        WHEN primary_issue = 'Severe Transit Delays' THEN 'High (Infrastructure Change)'
+        WHEN primary_issue = 'Bulk Order Processing' THEN 'Medium (Process Redesign)'
+        ELSE 'Low (Operational Tweak)'
+    END as implementation_complexity,
+    ROUND((delay_rate / 100) * avg_unit_price * total_shipments * 0.3, 2) as est_annual_savings
+FROM category_problems
+ORDER BY est_annual_savings DESC;
 ```
-Seasonal Patterns:
-	- November-December delays increase by 45% across all categories
-	- Bulk orders (quantity >5) have 2.3x higher delay probability
+
+<details> <summary><b>Click to expand shipping mode analysis</b></summary>
+
+High-Risk Product Categories (Logistics Bottlenecks)
+
+| Department | Category Name | Total Shipments | Delay Rate (%) | Avg. Delay (Days) | Revenue at Risk |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Outdoors** | Golf Bags & Carts | 61 | **68.85%** | 0.77 | $7,139.33 |
+| **Fitness** | Lacrosse | 343 | **60.06%** | 0.66 | $23,702.55 |
+| **Pet Shop** | Pet Supplies | 492 | **58.94%** | 0.71 | $24,474.72 |
+
+Key Insight:
+1. Specialized Item Bottlenecks: The categories with the highest delay rates (Golf Bags, Lacrosse equipment) often consist of bulky or non-standard sized items. This suggests that the current fulfillment process struggles with "Oversized/Irregular" logistics, leading to a significantly higher failure rate compared to standard-sized apparel.
+
+2. The "Narrow Miss" Pattern: Despite the very high delay rates (up to 69%), the Average Delay Days remain below 1 full day (0.66 – 0.77 days). This indicates a systemic issue where shipments are consistently missing their delivery windows by just a few hours or a single day, rather than experiencing long-term transit failures.
+
+3. Significant Revenue Vulnerability: While these categories have lower shipment volumes than general apparel, the Revenue at Risk is substantial. Pet Supplies and Lacrosse combined account for nearly $48,000 in at-risk revenue. Improving the logistics for these specific categories would yield a high ROI by protecting customer loyalty in these specialized segments.
+
+<details>
 
