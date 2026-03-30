@@ -41,7 +41,7 @@ This project addresses **five critical business questions** that drive supply ch
 
 | Category | Key Columns |
 |----------|-------------|
-| **Order Information** | `Order_Id`, `order_date_(DateOrders)`, `Order_Status`, `Order_Region`, `Market` |
+| **Order Information** | `Order_Id`, `order_date`, `Order_Status`, `Order_Region`, `Market` |
 | **Customer Details** | `Customer_Id`, `Customer_Segment`, `Customer_Country`, `Customer_City`, `Customer_State` |
 | **Shipping Metrics** | `Shipping_Mode`, `Days_for_shipping_real`, `Days_for_shipment_scheduled`, `Late_delivery_risk`, `Delay_Days` |
 | **Product Details** | `Category_Name`, `Department_Name`, `Product_Name`, `Order_Item_Quantity` |
@@ -464,6 +464,7 @@ Key Findings:
 
 3. **Revenue Recovery Opportunity:**
    Tier 4 represents the largest customer group (11,373). Improving delivery logistics for this segment to move them into the "Moderate" tier could theoretically increase the average CLV per customer by over **$1,100**.
+
 <details>
 
 #### Query 4: Shipping Mode Optimization
@@ -798,7 +799,7 @@ FROM category_problems
 ORDER BY est_annual_savings DESC;
 ```
 
-<details> <summary><b>Click to expand shipping mode analysis</b></summary>
+<details> <summary><b>Click to expand category analysis details</b></summary>
 
 High-Risk Product Categories (Logistics Bottlenecks)
 
@@ -816,4 +817,3 @@ Key Insight:
 3. Significant Revenue Vulnerability: While these categories have lower shipment volumes than general apparel, the Revenue at Risk is substantial. Pet Supplies and Lacrosse combined account for nearly $48,000 in at-risk revenue. Improving the logistics for these specific categories would yield a high ROI by protecting customer loyalty in these specialized segments.
 
 <details>
-
