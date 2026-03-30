@@ -41,7 +41,7 @@ This project addresses **five critical business questions** that drive supply ch
 
 | Category | Key Columns |
 |----------|-------------|
-| **Order Information** | `Order_Id`, `order_date_(DateOrders)`, `Order_Status`, `Order_Region`, `Market` |
+| **Order Information** | `Order_Id`, `order_date`, `Order_Status`, `Order_Region`, `Market` |
 | **Customer Details** | `Customer_Id`, `Customer_Segment`, `Customer_Country`, `Customer_City`, `Customer_State` |
 | **Shipping Metrics** | `Shipping_Mode`, `Days_for_shipping_real`, `Days_for_shipment_scheduled`, `Late_delivery_risk`, `Delay_Days` |
 | **Product Details** | `Category_Name`, `Department_Name`, `Product_Name`, `Order_Item_Quantity` |
