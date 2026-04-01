@@ -817,3 +817,7 @@ Key Insight:
 3. Significant Revenue Vulnerability: While these categories have lower shipment volumes than general apparel, the Revenue at Risk is substantial. Pet Supplies and Lacrosse combined account for nearly $48,000 in at-risk revenue. Improving the logistics for these specific categories would yield a high ROI by protecting customer loyalty in these specialized segments.
 
 <details>
+
+### 3. Data Visualization (Power BI)
+
+####
