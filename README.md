@@ -1,4 +1,4 @@
-# Supply Chain Analytics: Route Optimization & Delay Reduction
+# Supply Chain Analytics: Route Optimization & Delay Reduction (Still on Process)
 
 ## Project Overview
 This data analytics project analyzes **35,000+ supply chain transactions** from the DataCo Supply Chain dataset to identify root causes of shipping delays and provide **data-driven route optimization strategies**. By leveraging **SQL for deep analysis**, **Excel for data preparation**, and **Power BI for interactive visualization**, this project uncovers critical insights that can reduce delivery delays by **20-30%** and improve customer satisfaction across global markets.
@@ -150,7 +150,7 @@ Key Findings:
 3. **Revenue Recovery Opportunity:**
    Tier 4 represents the largest customer group (11,373). Improving delivery logistics for this segment to move them into the "Moderate" tier could theoretically increase the average CLV per customer by over **$1,100**.
 
-<details>
+</details>
 
 #### Query 4: Shipping Mode Optimization
 
@@ -168,7 +168,7 @@ Transportation Performance Scorecard
 Cost-Speed Trade-off:
 While First Class is faster, Standard Class is 3x more likely to meet its delivery promise, representing a critical trade-off between speed and reliability.
 
-<details>
+</details>
 
 #### Query 5: Product Category Vulnerability
 
@@ -189,8 +189,23 @@ Key Insight:
 
 3. Significant Revenue Vulnerability: While these categories have lower shipment volumes than general apparel, the Revenue at Risk is substantial. Pet Supplies and Lacrosse combined account for nearly $48,000 in at-risk revenue. Improving the logistics for these specific categories would yield a high ROI by protecting customer loyalty in these specialized segments.
 
-<details>
+</details>
 
 ### 3. Data Visualization (Power BI)
+The interactive Power BI dashboard transforms 180k+ rows of supply chain logs into actionable business intelligence. It is built with a **drill-down architecture**, allowing stakeholders to transition from global KPIs to specific SKU-level bottlenecks.
 
-####
+---
+
+### 📊 Dashboard Breakdown
+
+#### **Page 1: Executive Operations Command**
+*Focus: High-level KPI monitoring and global delay trends.*
+
+*   **KPI Scorecard:** Real-time tracking of **Total Orders (181K)**, **Total Revenue ($36.8M)**, and **Average Delay Days (1.6 Days)**.
+*   **Performance Monitoring:** A Gauge chart measuring the **On-Time Delivery (OTD) Rate (42.72%)**, highlighting a significant gap against the **95% industry target**.
+*   **Monthly Performance Trend:** A dual-axis line chart comparing **Total Revenue** and **On-Time Rate** from 2015 to 2018 to identify correlation between logistics stability and financial growth.
+
+> [!CAUTION]
+> **Key Insight:** With an **OTD Rate of only 42.72%**, more than **57% of all shipments** are currently categorized as "Delayed," representing a critical risk to customer retention and brand reputation.
+
+---
