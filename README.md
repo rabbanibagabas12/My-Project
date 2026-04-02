@@ -1,4 +1,4 @@
-# Supply Chain Analytics: Route Optimization & Delay Reduction
+# Supply Chain Analytics: Route Optimization & Delay Reduction (Still on Process)
 
 ## Project Overview
 This data analytics project analyzes **35,000+ supply chain transactions** from the DataCo Supply Chain dataset to identify root causes of shipping delays and provide **data-driven route optimization strategies**. By leveraging **SQL for deep analysis**, **Excel for data preparation**, and **Power BI for interactive visualization**, this project uncovers critical insights that can reduce delivery delays by **20-30%** and improve customer satisfaction across global markets.
