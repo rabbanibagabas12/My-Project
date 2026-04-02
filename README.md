@@ -192,5 +192,20 @@ Key Insight:
 </details>
 
 ### 3. Data Visualization (Power BI)
+The interactive Power BI dashboard transforms 180k+ rows of supply chain logs into actionable business intelligence. It is built with a **drill-down architecture**, allowing stakeholders to transition from global KPIs to specific SKU-level bottlenecks.
 
-####
+---
+
+### 📊 Dashboard Breakdown
+
+#### **Page 1: Executive Operations Command**
+*Focus: High-level KPI monitoring and global delay trends.*
+
+*   **KPI Scorecard:** Real-time tracking of **Total Orders (181K)**, **Total Revenue ($36.8M)**, and **Average Delay Days (1.6 Days)**.
+*   **Performance Monitoring:** A Gauge chart measuring the **On-Time Delivery (OTD) Rate (42.72%)**, highlighting a significant gap against the **95% industry target**.
+*   **Monthly Performance Trend:** A dual-axis line chart comparing **Total Revenue** and **On-Time Rate** from 2015 to 2018 to identify correlation between logistics stability and financial growth.
+
+> [!CAUTION]
+> **Key Insight:** With an **OTD Rate of only 42.72%**, more than **57% of all shipments** are currently categorized as "Delayed," representing a critical risk to customer retention and brand reputation.
+
+---
