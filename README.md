@@ -150,7 +150,7 @@ Key Findings:
 3. **Revenue Recovery Opportunity:**
    Tier 4 represents the largest customer group (11,373). Improving delivery logistics for this segment to move them into the "Moderate" tier could theoretically increase the average CLV per customer by over **$1,100**.
 
-<details>
+</details>
 
 #### Query 4: Shipping Mode Optimization
 
@@ -168,7 +168,7 @@ Transportation Performance Scorecard
 Cost-Speed Trade-off:
 While First Class is faster, Standard Class is 3x more likely to meet its delivery promise, representing a critical trade-off between speed and reliability.
 
-<details>
+</details>
 
 #### Query 5: Product Category Vulnerability
 
@@ -189,7 +189,7 @@ Key Insight:
 
 3. Significant Revenue Vulnerability: While these categories have lower shipment volumes than general apparel, the Revenue at Risk is substantial. Pet Supplies and Lacrosse combined account for nearly $48,000 in at-risk revenue. Improving the logistics for these specific categories would yield a high ROI by protecting customer loyalty in these specialized segments.
 
-<details>
+</details>
 
 ### 3. Data Visualization (Power BI)
 
