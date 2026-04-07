@@ -79,9 +79,9 @@ This project addresses **five critical business questions** that drive supply ch
 -Delete Product Description Column
 - Data types verified and corrected
 - Calculated new columns:
-  - `Delay Days` = Actual Delivery Days - Planned Delivery Days
-  - `Delay Severity` = IF=(Delay Days<0,"Early",IF(Delay Days=0,"On Time",IF(Delay Days<=3,"Minor Delay",IF(Delay Days>3,"Moderate Delay"))))
-  - `On_Time_Flag` = IF(Delay Days ≤ 0, "On Time", "Delayed")
+  - `Delay Days`
+  - `Delay Severity`
+  - `On_Time_Flag`
 
 **Data Quality Summary:**
 There is no duplicate data
